@@ -1,0 +1,148 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void generateRandomNumbers(int n, int min_value, int max_value, int array[]) {
+    for (int i = 0; i < n; ++i) {
+        array[i] = rand() % (max_value - min_value + 1) + min_value;
+    }
+}
+
+void inputNumbersFromKeyboard(int n, int array[]) {
+    printf("Введите %d чисел:\n", n);
+    for (int i = 0; i < n; ++i) {
+        scanf_s("%d", &array[i]);
+    }
+}
+
+int inputNumbersFromFile(const char* filename, int array[]) {
+    FILE* file;
+    if (fopen_s(&file, filename, "r") != 0) {
+        printf("Ошибка: Не удалось открыть файл %s для чтения.\n", filename);
+        return 0; 
+    }
+
+    int n = 0;
+    while (fscanf_s(file, "%d", &array[n]) == 1) {
+        n++;
+    }
+        
+    fclose(file);
+    return n; 
+}
+
+void writeNumbersToFile(const char* filename, int n, int array[]) {
+    FILE* file;
+    if (fopen_s(&file, filename, "w") != 0) {
+        printf("Ошибка: Не удалось открыть файл %s для записи.\n", filename);
+        exit(1);
+    }
+
+    printf("Запись чисел в файл %s:\n", filename);
+    for (int i = 0; i < n; ++i) {
+        fprintf(file, "%d\n", array[i]);
+    }
+
+    fclose(file);
+}
+
+void printArray(int n, int array[]) {
+    printf("Массив чисел:\n");
+    for (int i = 0; i < n; ++i) {
+        printf("%d ", array[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    int n = 0; 
+    int min_value, max_value; 
+
+    int choice;
+    printf("Выберите режим ввода:\n");
+    printf("1. Случайные числа\n");
+    printf("2. Ввод с клавиатуры\n");
+    printf("3. Чтение из файла\n");
+    scanf_s("%d", &choice);
+
+    switch (choice) {
+    case 1:
+       
+        printf("Введите количество чисел: ");
+        scanf_s("%d", &n);
+
+        printf("Введите минимальное значение: ");
+        scanf_s("%d", &min_value);
+
+        printf("Введите максимальное значение: ");
+        scanf_s("%d", &max_value);
+
+        
+        int* array = (int*)malloc(n * sizeof(int));
+
+        if (array == NULL) {
+            printf("Ошибка: Не удалось выделить память для массива.\n");
+            return 1; 
+        }
+
+        generateRandomNumbers(n, min_value, max_value, array);
+
+        printArray(n, array);
+
+        
+        writeNumbersToFile("numbers.txt", n, array);
+
+        
+        free(array);
+        break;
+    case 2:
+        
+        printf("Введите количество чисел: ");
+        scanf_s("%d", &n);
+
+       
+        int* arrayKeyboard = (int*)malloc(n * sizeof(int));
+
+        if (arrayKeyboard == NULL) {
+            printf("Ошибка: Не удалось выделить память для массива.\n");
+            return 1; 
+        }
+
+        inputNumbersFromKeyboard(n, arrayKeyboard);
+        printArray(n, arrayKeyboard);
+
+        
+        writeNumbersToFile("numbers.txt", n, arrayKeyboard);
+
+       
+        free(arrayKeyboard);
+        break;
+    case 3:
+    {
+        char filename[100];
+        
+        printf("Введите имя файла: ");
+        scanf_s("%s", filename, (unsigned)_countof(filename));
+
+        
+        int arrayFromFile[1000]; 
+
+        int elementsRead = inputNumbersFromFile(filename, arrayFromFile);
+        if (elementsRead > 0) {
+            
+            printArray(elementsRead, arrayFromFile);
+
+            
+            writeNumbersToFile("numbers.txt", elementsRead, arrayFromFile);
+        }
+        else {
+            printf("Не удалось считать числа из файла.\n");
+        }
+        break;
+    }
+    default:
+        printf("Ошибка: Неверный выбор режима ввода.\n");
+        return 1; 
+    }
+
+    return 0;
+}
