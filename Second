@@ -1,0 +1,216 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define MAX_SIZE 1000
+
+
+void printArray(double arr[], int size) {
+    printf("Текущий массив: ");
+    for (int i = 0; i < size; i++) {
+        printf("%.3lf ", arr[i]);
+    }
+    printf("\n");
+}
+void quickSort(double arr[], int low, int high) {
+    if (low < high) {
+        
+        int pivotIndex = partition(arr, low, high);
+
+        
+        quickSort(arr, low, pivotIndex - 1);
+        quickSort(arr, pivotIndex + 1, high);
+    }
+}
+
+
+int partition(double arr[], int low, int high) {
+    double pivot = arr[high];
+    int i = low - 1;
+
+    for (int j = low; j <= high - 1; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            
+            double temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+
+    
+    double temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
+
+    return i + 1;
+}
+
+
+void insertionSort(double arr[], int size) {
+    int i, j;
+    double key;
+    for (i = 1; i < size; i++) {
+        key = arr[i];
+        j = i - 1;
+
+        
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j = j - 1;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+
+void sortArray(double arr[], int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+               
+                double temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+    printf("Массив отсортирован пузырьковым способом.\n");
+}
+
+
+double calculateFirstNorm(double arr[], int size) {
+    double norm = 0;
+    for (int i = 0; i < size; i++) {
+        norm += fabs(arr[i]);
+    }
+    return norm;
+}
+
+
+double calculateSecondNorm(double arr[], int size) {
+    double norm = 0.0;
+    for (int i = 0; i < size; i++) {
+        norm += pow(arr[i], 2);
+    }
+    return sqrt(norm);
+}
+
+
+double calculateInfinityNorm(double arr[], int size) {
+    double norm = 0;
+    for (int i = 0; i < size; i++) {
+        if (fabs(arr[i]) > norm) {
+            norm = fabs(arr[i]);
+        }
+    }
+    return norm;
+}
+
+
+void normalizeArray(double arr[], int size) {
+    double norm = calculateSecondNorm(arr, size);
+    if (norm != 0) {
+        for (int i = 0; i < size; i++) {
+            arr[i] /= norm;
+        }
+        printf("Массив нормирован.\n");
+    }
+    else {
+        printf("Норма вектора равна нулю, невозможно выполнить нормировку.\n");
+    }
+}
+
+
+void resetArray(double original[], double current[], int size) {
+    for (int i = 0; i < size; i++) {
+        current[i] = original[i];
+    }
+    printf("Массив сброшен к исходному состоянию.\n");
+}
+
+int main() {
+    double originalNumbers[MAX_SIZE]; 
+    double currentNumbers[MAX_SIZE];  
+    int size = 0;
+    char filename[100];
+    char line[100];
+
+    
+    printf("Введите имя файла: ");
+    scanf_s("%s", filename, (unsigned)_countof(filename));
+
+   
+    FILE* file;
+    if (fopen_s(&file, filename, "r") != 0) {
+        printf("Ошибка открытия файла.\n");
+        return 1;
+    }
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        sscanf_s(line, "%lf", &originalNumbers[size]);
+        currentNumbers[size] = originalNumbers[size];  
+        size++;
+    }
+
+    fclose(file);
+
+   
+    while (1) {
+        int choice;
+
+        
+        printf("\nВыберите действие:\n");
+        printf("1. Печать\n");
+        printf("2. Сортировка пузырьком\n");
+        printf("3. Сброс\n");
+        printf("4. Вычислить первую норму\n");
+        printf("5. Вычислить вторую норму\n");
+        printf("6. Вычислить бесконечную норму\n");
+        printf("7. Нормировать вектор\n");
+        printf("8. Быстрая сортировка\n");
+        printf("9. Сортировка вставкой\n");
+        printf("10. Выход\n");
+        printf("Ваш выбор: ");
+        scanf_s("%d", &choice);
+
+        switch (choice) {
+        case 1:
+            printArray(currentNumbers, size);
+            break;
+        case 2:
+            sortArray(currentNumbers, size);
+            break;
+        case 3:
+            resetArray(originalNumbers, currentNumbers, size); 
+            break;
+        case 4:
+            printf("Первая норма массива: %.3lf\n", calculateFirstNorm(currentNumbers, size));
+            break;
+        case 5:
+            printf("Вторая норма массива: %.3lf\n", calculateSecondNorm(currentNumbers, size));
+            break;
+        case 6:
+            printf("Бесконечная норма массива: %.3lf\n", calculateInfinityNorm(currentNumbers, size));
+            break;
+        case 7:
+            normalizeArray(currentNumbers, size);
+            break;
+        case 8:
+            quickSort(currentNumbers, 0, size - 1);
+            printf("Массив отсортирован с использованием быстрой сортировки.\n");
+            break;
+        case 9:
+            insertionSort(currentNumbers, size);
+            printf("Массив отсортирован с использованием сортировки вставкой.\n");
+            break;
+        case 10:
+            printf("Программа завершена.\n");
+            return 0;
+        default:
+            printf("Некорректный выбор. Повторите попытку.\n");
+        }
+    }
+
+    return 0;
+}
